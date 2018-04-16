@@ -22,7 +22,14 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -37,17 +44,20 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback ,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
-    private BottomSheetBehavior bottomSheetBehavior;
     LatLng mCurrentLocation;
     GoogleApiClient googleApiClient;
     LocationRequest mLocationRequest;
-    TextView mPlacenameTv, mPlaceDetailsTv, mDurationTv;
+    TextView mCurrentSpeed, mInformation;
     Marker mPositionMarker;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -62,18 +72,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         LinearLayout llBottomSheet = (LinearLayout) findViewById(R.id.bottom_sheet);
 
-        mPlacenameTv = (TextView) findViewById(R.id.placeName);
-        mPlaceDetailsTv = (TextView) findViewById(R.id.placeDetails);
-        mDurationTv = (TextView) findViewById(R.id.tvDuration);
-        bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
-        bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO);
-        bottomSheetBehavior.setHideable(false);
+        mCurrentSpeed = (TextView) findViewById(R.id.currentSpeedTv);
+
+        mInformation = (TextView) findViewById(R.id.infoAvailable);
 
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this).build();
 
+        getFlightDetails();
     }
 
     @Override
@@ -101,7 +109,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.setPadding(0, 0, 0, 300);
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location)
+            {
+                mCurrentLocation=new LatLng(location.getLatitude(),location.getLongitude());
+                mPositionMarker = mMap.addMarker(new MarkerOptions().flat(true).anchor(0.5f, 0.5f).position(mCurrentLocation).icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.plane))));
+
+                mMap.animateCamera(zoomingLocation(mCurrentLocation), new GoogleMap.CancelableCallback()
+                {
+                    @Override
+                    public void onFinish()
+                    {
+                        mMap.setMyLocationEnabled(false);
+                        createLocationRequest();
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+            }
+        });
 
 
 
@@ -135,7 +168,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnected(@Nullable Bundle bundle)
     {
-        createLocationRequest();
+
     }
 
     @Override
@@ -152,45 +185,66 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLocationChanged(Location location)
     {
 
-        mCurrentLocation=new LatLng(location.getLatitude(),location.getLongitude());
 
-
-        if(location.getAccuracy()<20.0)
+        if (location.getAccuracy() < 20.0)
 
         {
 
+            mCurrentSpeed.setText(location.getSpeed()*3.6+" km/h & Altitude is "+location.getAltitude()+"m" );
+            mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            animateMarker(mPositionMarker, location);
 
-
-            if(mPositionMarker==null)
-            {
-
-                mMap.animateCamera(zoomingLocation(mCurrentLocation), new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onFinish()
-                    {
-                        mPositionMarker = mMap.addMarker(new MarkerOptions().flat(true).anchor(0.5f, 0.5f).position(mCurrentLocation).icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.plane))));
-                        mLocationRequest.setSmallestDisplacement(10);
-                    }
-
-                    @Override
-                    public void onCancel() {
-
-                    }
-                });
-            }
-
-            else
+            LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+            if (!bounds.contains(mCurrentLocation))
             {
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mCurrentLocation));
-                animateMarker(mPositionMarker, location);
             }
-
-
 
 
         }
 
+
     }
+
+
+
+
+    public void getFlightDetails()
+    {
+        String UrlCity = "http://cphrb.ihuerta.net/flight_info.json?flight_number=LH1242&amp;date=2018-06-01";
+        JsonObjectRequest stateReq = new JsonObjectRequest(Request.Method.GET, UrlCity, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response)
+            {
+                try
+                {
+                    mInformation.setText("Flying from "+response.getString("origin_city")+" to "+response.getString("destination_city"));
+                }
+
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+                Toast.makeText(MapsActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        // add it to the RequestQueue
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stateReq);
+
+    }
+
+
+
+
 
 
     private CameraUpdate zoomingLocation(LatLng position) {
@@ -213,7 +267,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(3000);
-        mLocationRequest.setFastestInterval(500);
+        mLocationRequest.setFastestInterval(3000);
+        mLocationRequest.setSmallestDisplacement(10);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, mLocationRequest, this);
     }
