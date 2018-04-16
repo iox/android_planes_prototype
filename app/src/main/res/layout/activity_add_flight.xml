@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".FlightListActivity">
+
+    <!-- TODO: Update blank fragment layout -->
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_margin="20dp"
+        android:padding="10dp"
+        android:background="@drawable/txt_area_dark_yellow"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:textSize="15sp"
+            android:hint="Flight Number"
+            android:id="@+id/edittext_flight_num"
+            android:background="@android:color/transparent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_margin="20dp"
+        android:padding="10dp"
+        android:background="@drawable/txt_area_dark_yellow"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:textSize="15sp"
+            android:text="@string/Date"
+            android:id="@+id/tvDate"
+            android:background="@android:color/transparent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/add_flight"
+        android:layout_margin="20dp"
+        android:background="@color/colorPrimary"
+        android:text="ADD FLIGHT"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
+

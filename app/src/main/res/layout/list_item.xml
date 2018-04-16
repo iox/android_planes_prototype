@@ -10,6 +10,7 @@
         android:id="@+id/text_flight_number"
         android:layout_width="wrap_content"
         android:textSize="20sp"
+        android:textColor="@android:color/black"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:maxLines="2" />
@@ -18,7 +19,8 @@
             android:id="@+id/text_date"
             android:layout_width="wrap_content"
             android:layout_alignParentRight="true"
-            android:textSize="20sp"
+            android:textSize="15sp"
+            android:textColor="@color/grey_10"
             android:layout_height="wrap_content"
             android:maxLines="2" />
 

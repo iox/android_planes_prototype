@@ -19,8 +19,8 @@ import pk.android.com.flightapp.model.ListItems;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final String DATABASE_NAME = "mylist.db";
-    public static final String TABLE_NAME = "mylist_data";
+    public static final String DATABASE_NAME = "flightlist.db";
+    public static final String TABLE_NAME = "flightlist_data";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_DATE = "dateTime";
     public static final String COLUMN_FLIGHT_NUMBER = "flightNumber";
@@ -37,8 +37,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String query = "CREATE TABLE " + TABLE_NAME + "(" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+
                 COLUMN_DATE + " TEXT, " +
-                COLUMN_FLIGHT_NUMBER + " TEXT, " +
+                COLUMN_FLIGHT_NUMBER + " TEXT " +
 
 
                 ");";

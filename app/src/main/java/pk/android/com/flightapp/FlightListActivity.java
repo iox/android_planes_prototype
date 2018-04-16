@@ -1,9 +1,12 @@
 package pk.android.com.flightapp;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,11 +30,29 @@ public class FlightListActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flight_list);
         listView=(ListView)findViewById(R.id.flight_list);
+        Button addFlight=(Button)findViewById(R.id.add_item);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        addFlight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                startActivity(new Intent(getBaseContext(),AddFlightActivity.class));
+            }
+        });
+
+
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
         myDB= new DatabaseHelper(this);
         mArray = myDB.getListContents();
         setupRecycler();
-    }
 
+    }
 
     private void setupRecycler()
     {
@@ -55,5 +76,16 @@ public class FlightListActivity extends AppCompatActivity
         });
 
 
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if(item.getItemId()==android.R.id.home)
+        {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

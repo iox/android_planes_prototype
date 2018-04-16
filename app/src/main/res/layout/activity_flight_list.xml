@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,7 +8,19 @@
     <ListView
         android:layout_width="match_parent"
         android:id="@+id/flight_list"
+        android:layout_above="@+id/add_item"
         android:layout_height="match_parent" />
 
-</FrameLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/add_item"
+        android:layout_margin="20dp"
+        android:background="@color/colorPrimary"
+        android:text="ADD FLIGHT"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content" />
+
+
+</RelativeLayout>
 
