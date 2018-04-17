@@ -50,8 +50,8 @@ public class ListcustomAdapter extends ArrayAdapter<ListItems> {
 
         ListItems item = mListitems.get(position);
 
-        holder.flightNumber.setText(String.format( "%s", item.getFlightNumber()));
-        holder.dateTime.setText(String.format("%s",item.getDateTime()));
+        holder.flightNumber.setText(String.format("%s", item.getFlightNumber()));
+        holder.dateTime.setText(String.format("%s", item.getDateTime()));
 
 
         return itemView;

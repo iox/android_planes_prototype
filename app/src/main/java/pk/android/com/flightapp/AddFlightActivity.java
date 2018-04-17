@@ -17,31 +17,28 @@ import java.util.Calendar;
 import pk.android.com.flightapp.data.DatabaseHelper;
 import pk.android.com.flightapp.model.ListItems;
 
-public class AddFlightActivity extends AppCompatActivity
-{
+public class AddFlightActivity extends AppCompatActivity {
 
     TextView date;
     DatabaseHelper mydb;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_flight);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mydb= new DatabaseHelper(this);
-        final EditText  etFlightnum =(EditText)findViewById(R.id.edittext_flight_num);
-        date=(TextView)findViewById(R.id.tvDate);
+        mydb = new DatabaseHelper(this);
+        final EditText etFlightnum = (EditText) findViewById(R.id.edittext_flight_num);
+        date = (TextView) findViewById(R.id.tvDate);
 
 
         final Calendar myCalendar = Calendar.getInstance();
 
-        final DatePickerDialog.OnDateSetListener datepicker = new DatePickerDialog.OnDateSetListener()
-        {
+        final DatePickerDialog.OnDateSetListener datepicker = new DatePickerDialog.OnDateSetListener() {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                  int dayOfMonth)
-            {
+                                  int dayOfMonth) {
                 // TODO Auto-generated method stub
 
                 myCalendar.set(Calendar.YEAR, year);
@@ -56,8 +53,7 @@ public class AddFlightActivity extends AppCompatActivity
 
         date.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 new DatePickerDialog(AddFlightActivity.this, datepicker, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
@@ -65,22 +61,17 @@ public class AddFlightActivity extends AppCompatActivity
         });
 
 
-        Button addFlight=(Button)findViewById(R.id.add_flight);
+        Button addFlight = (Button) findViewById(R.id.add_flight);
 
         addFlight.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
 
-                if(etFlightnum.getText().toString().isEmpty()||date.getText().toString().equalsIgnoreCase("Date"))
-                {
+                if (etFlightnum.getText().toString().isEmpty() || date.getText().toString().equalsIgnoreCase("Date")) {
                     Toast.makeText(AddFlightActivity.this, "Please input data", Toast.LENGTH_SHORT).show();
 
-                }
-
-                else
-                {
-                    ListItems item= new ListItems();
+                } else {
+                    ListItems item = new ListItems();
                     item.setFlightNumber(etFlightnum.getText().toString());
                     item.setDateTime(date.getText().toString());
                     mydb.addData(item);
@@ -90,17 +81,14 @@ public class AddFlightActivity extends AppCompatActivity
                 }
 
 
-
             }
         });
 
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if(item.getItemId()==android.R.id.home)
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
             finish();
         }
         return super.onOptionsItemSelected(item);

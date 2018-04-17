@@ -17,26 +17,23 @@ import pk.android.com.flightapp.adapter.ListcustomAdapter;
 import pk.android.com.flightapp.data.DatabaseHelper;
 import pk.android.com.flightapp.model.ListItems;
 
-public class FlightListActivity extends AppCompatActivity
-{
+public class FlightListActivity extends AppCompatActivity {
     DatabaseHelper myDB;
     ArrayList<ListItems> mArray = new ArrayList<>();
     ListcustomAdapter adapter;
     private ListView listView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flight_list);
-        listView=(ListView)findViewById(R.id.flight_list);
-        Button addFlight=(Button)findViewById(R.id.add_item);
+        listView = (ListView) findViewById(R.id.flight_list);
+        Button addFlight = (Button) findViewById(R.id.add_item);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         addFlight.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-                startActivity(new Intent(getBaseContext(),AddFlightActivity.class));
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), AddFlightActivity.class));
             }
         });
 
@@ -44,26 +41,23 @@ public class FlightListActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
 
-        myDB= new DatabaseHelper(this);
+        myDB = new DatabaseHelper(this);
         mArray = myDB.getListContents();
         setupRecycler();
 
     }
 
-    private void setupRecycler()
-    {
+    private void setupRecycler() {
 
 
         adapter = new ListcustomAdapter(this, R.layout.list_item, mArray);
         Collections.reverse(mArray);
         listView.setAdapter(adapter);
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
-        {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 if (myDB.removeItem(mArray.get(position))) {
@@ -80,10 +74,8 @@ public class FlightListActivity extends AppCompatActivity
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if(item.getItemId()==android.R.id.home)
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
             finish();
         }
         return super.onOptionsItemSelected(item);

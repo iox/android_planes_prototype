@@ -1,4 +1,5 @@
 package pk.android.com.flightapp;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,17 +15,14 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +44,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -55,7 +52,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback ,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
     LatLng mCurrentLocation;
@@ -63,64 +60,52 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     LocationRequest mLocationRequest;
     TextView mCurrentSpeed, mInformation;
     Marker mPositionMarker;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_location);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         mCurrentSpeed = (TextView) findViewById(R.id.currentSpeedTv);
-
         mInformation = (TextView) findViewById(R.id.infoAvailable);
-
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this).build();
-
         getFlightDetails();
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
-        if(!isGPSEnabled(this))
-        {
+        if (!isGPSEnabled(this)) {
             showGPSDisabledAlertToUser();
         }
     }
 
-    public boolean isGPSEnabled (Context mContext)
-    {
+    public boolean isGPSEnabled(Context mContext) {
         LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
 
-    private void showGPSDisabledAlertToUser()
-    {
+    private void showGPSDisabledAlertToUser() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("GPS is disabled in your device. Would you like to enable it?")
                 .setCancelable(false)
                 .setPositiveButton("Enable GPS",
-                        new DialogInterface.OnClickListener(){
-                            public void onClick(DialogInterface dialog, int id){
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
                                 Intent callGPSSettingIntent = new Intent(
                                         android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                 startActivity(callGPSSettingIntent);
                             }
                         });
         alertDialogBuilder.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
-                    {
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                         showGPSDisabledAlertToUser();
                     }
@@ -130,10 +115,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
-
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -141,16 +122,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         stopLocationUpdates();
         googleApiClient.disconnect();
         super.onDestroy();
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setMyLocationEnabled(true);
@@ -158,10 +137,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
-            public void onMyLocationChange(Location location)
-            {
-                mCurrentLocation=new LatLng(location.getLatitude(),location.getLongitude());
-                mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(mCurrentLocation ,10) );
+            public void onMyLocationChange(Location location) {
+                mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, 10));
                 mMap.setMyLocationEnabled(false);
                 mPositionMarker = mMap.addMarker(new MarkerOptions().flat(true).anchor(0.5f, 0.5f).position(mCurrentLocation).icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.plane))));
                 createLocationRequest();
@@ -170,14 +148,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
 
-
         // Add a marker in Sydney and move the camera
 
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_current_location, menu);
         return true;
@@ -186,11 +162,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.action_map:
 
-                startActivity(new Intent(getBaseContext(),FlightListActivity.class));
+                startActivity(new Intent(getBaseContext(), FlightListActivity.class));
                 return true;
 
         }
@@ -199,8 +174,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle)
-    {
+    public void onConnected(@Nullable Bundle bundle) {
 
     }
 
@@ -215,21 +189,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onLocationChanged(Location location)
-    {
+    public void onLocationChanged(Location location) {
 
 
         if (location.getAccuracy() < 20.0)
 
         {
 
-            mCurrentSpeed.setText(location.getSpeed()*3.6+" km/h & Altitude is "+location.getAltitude()+"m" );
+            mCurrentSpeed.setText(location.getSpeed() * 3.6 + " km/h & Altitude is " + location.getAltitude() + "m");
             mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             animateMarker(mPositionMarker, location);
 
             LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-            if (!bounds.contains(mCurrentLocation))
-            {
+            if (!bounds.contains(mCurrentLocation)) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mCurrentLocation));
             }
 
@@ -240,31 +212,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
-    public void getFlightDetails()
-    {
+    public void getFlightDetails() {
         String UrlCity = "http://cphrb.ihuerta.net/flight_info.json?flight_number=LH1242&amp;date=2018-06-01";
         JsonObjectRequest stateReq = new JsonObjectRequest(Request.Method.GET, UrlCity, null, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONObject response)
-            {
-                try
-                {
-                    mInformation.setText("Flying from "+response.getString("origin_city")+" to "+response.getString("destination_city"));
-                }
-
-                catch (JSONException e)
-                {
+            public void onResponse(JSONObject response) {
+                try {
+                    mInformation.setText("Flying from " + response.getString("origin_city") + " to " + response.getString("destination_city"));
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-        }, new Response.ErrorListener()
-        {
+        }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error)
-            {
+            public void onErrorResponse(VolleyError error) {
 
                 Toast.makeText(MapsActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
             }
@@ -277,16 +239,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
-
-
     private CameraUpdate zoomingLocation(LatLng position) {
         return CameraUpdateFactory.newLatLngZoom(position, 16);
     }
 
-    protected void createLocationRequest()
-    {
+    protected void createLocationRequest() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -308,8 +265,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    public void animateMarker(final Marker marker, final Location location)
-    {
+    public void animateMarker(final Marker marker, final Location location) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         final LatLng startLatLng = marker.getPosition();
@@ -345,15 +301,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    protected void stopLocationUpdates()
-    {
+    protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
     }
 
 
-
-    private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable)
-    {
+    private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         canvas.setBitmap(bitmap);
@@ -361,10 +314,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
-
-
-
-
 
 
 }
