@@ -1,11 +1,14 @@
 package pk.android.com.flightapp;
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -13,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -70,8 +74,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
 
-        LinearLayout llBottomSheet = (LinearLayout) findViewById(R.id.bottom_sheet);
-
         mCurrentSpeed = (TextView) findViewById(R.id.currentSpeedTv);
 
         mInformation = (TextView) findViewById(R.id.infoAvailable);
@@ -88,7 +90,49 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume()
     {
         super.onResume();
+        if(!isGPSEnabled(this))
+        {
+            showGPSDisabledAlertToUser();
+        }
     }
+
+    public boolean isGPSEnabled (Context mContext)
+    {
+        LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+
+    private void showGPSDisabledAlertToUser()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("GPS is disabled in your device. Would you like to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Enable GPS",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                Intent callGPSSettingIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(callGPSSettingIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int id)
+                    {
+                        dialog.dismiss();
+                        showGPSDisabledAlertToUser();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+
+
+
+
 
     @Override
     protected void onStart() {
@@ -117,22 +161,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMyLocationChange(Location location)
             {
                 mCurrentLocation=new LatLng(location.getLatitude(),location.getLongitude());
+                mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(mCurrentLocation ,10) );
+                mMap.setMyLocationEnabled(false);
                 mPositionMarker = mMap.addMarker(new MarkerOptions().flat(true).anchor(0.5f, 0.5f).position(mCurrentLocation).icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.plane))));
+                createLocationRequest();
 
-                mMap.animateCamera(zoomingLocation(mCurrentLocation), new GoogleMap.CancelableCallback()
-                {
-                    @Override
-                    public void onFinish()
-                    {
-                        mMap.setMyLocationEnabled(false);
-                        createLocationRequest();
-                    }
-
-                    @Override
-                    public void onCancel() {
-
-                    }
-                });
             }
         });
 
@@ -221,7 +254,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mInformation.setText("Flying from "+response.getString("origin_city")+" to "+response.getString("destination_city"));
                 }
 
-                catch (JSONException e) {
+                catch (JSONException e)
+                {
                     e.printStackTrace();
                 }
             }
